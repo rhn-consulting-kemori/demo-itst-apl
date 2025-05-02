@@ -1,0 +1,61 @@
+- route:
+    id: route-process
+    description: 売上受付
+    from:
+      id: from-http-entry
+      description: Shopping Entry Request
+      uri: rest
+      parameters:
+        consumes: application/json
+        inType: com.redhat.example.entity.ShoppingEntryTypeRequest
+        method: post
+        path: demo/shopping_entry
+      steps:
+        - log:
+            id: log-request
+            message: "Request: ${body}"
+        - unmarshal:
+            id: unmarshal-request
+            json:
+              unmarshalType: com.redhat.example.entity.ShoppingEntryTypeRequest
+        - setProperty:
+            id: setProperty-request
+            expression:
+              simple:
+                expression: ${body}
+            name: request
+        - to:
+            id: to-sql
+            description: customer access
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.CustomerEntity
+              outputType: SelectOne
+              query: SELECT * FROM customer WHERE card_number = :#${body.use_card_number};
+        - setProperty:
+            id: setProperty-customer
+            expression:
+              simple:
+                expression: ${body}
+            name: customer
+        - to:
+            id: to-insert
+            description: insert shopping_entry
+            uri: sql
+            parameters:
+              query: INSERT INTO shopping_entry(customer_number, use_card_number, use_date,
+                shop_name, use_amount, pay_type)
+                VALUES(:#${exchangeProperty.customer.customer_number},
+                :#${exchangeProperty.request.use_card_number},
+                :#${exchangeProperty.request.use_date},
+                :#${exchangeProperty.request.shop_name},
+                :#${exchangeProperty.request.use_amount},
+                :#${exchangeProperty.request.pay_type});
+        - log:
+            id: log-response
+            message: "Success: ${exchangeProperty.request}"
+        - transform:
+            id: transform-3362
+            expression:
+              constant:
+                expression: '{"result": "success"}'

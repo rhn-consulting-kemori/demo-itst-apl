@@ -1,0 +1,83 @@
+- route:
+    id: route-process
+    description: 売上登録
+    from:
+      id: from-start
+      description: Start
+      uri: timer
+      parameters:
+        period: "1000"
+        repeatCount: "1"
+        timerName: timer-start
+      steps:
+        - log:
+            id: log-start
+            message: "[START] shopping_put"
+        - to:
+            id: to-get_shopping_entry
+            description: Get shopping_entry
+            uri: sql
+            parameters:
+              query: SELECT * FROM shopping_entry;
+        - split:
+            id: split-3446
+            steps:
+              - log:
+                  id: log-split-body
+                  message: "INPUT: ${body}"
+              - to:
+                  id: to-bean
+                  uri: bean
+                  parameters:
+                    beanName: createShoppingRecordRule
+                    method: executeRule
+              - setProperty:
+                  id: setProperty-record
+                  expression:
+                    simple:
+                      expression: ${body}
+                  name: shopping_record
+              - to:
+                  id: to-insert
+                  description: Insert shopping_record
+                  uri: sql
+                  parameters:
+                    query: INSERT INTO shopping_record VALUES (:#${body.shopping_number},
+                      :#${body.customer_number}, :#${body.use_card_number},
+                      :#${body.seikyu_shimebi}, :#${body.pay_type},
+                      :#${body.use_date}, :#${body.shop_name},
+                      :#${body.use_amount});
+              - to:
+                  id: to-delete
+                  description: Delete shopping_entry
+                  uri: sql
+                  parameters:
+                    query: DELETE FROM shopping_entry WHERE shopping_number =
+                      :#${exchangeProperty.shopping_record.shopping_number}
+              - setBody:
+                  id: setBody-3368
+                  expression:
+                    simple:
+                      expression: ${exchangeProperty.shopping_record}
+              - marshal:
+                  id: marshal-json
+                  json: {}
+              - to:
+                  id: to-file
+                  uri: file
+                  parameters:
+                    directoryName: data/
+                    fileName: output.txt
+              - log:
+                  id: log-record-done
+                  message: "Done: ${body}"
+            expression:
+              simple:
+                expression: ${body}
+        - log:
+            id: log-finish
+            message: "[Finish] shopping_put"
+        - process:
+            id: process-stop
+            description: 終了
+            ref: "#class:com.redhat.example.processor.CamelStopProcessor"
