@@ -7,7 +7,7 @@
       uri: rest
       parameters:
         consumes: application/json
-        inType: com.redhat.example.entity.ShoppingEntryTypeRequest
+        inType: com.redhat.example.type.ShoppingEntryTypeRequest
         method: post
         path: demo/shopping_entry
       steps:
@@ -17,7 +17,7 @@
         - unmarshal:
             id: unmarshal-request
             json:
-              unmarshalType: com.redhat.example.entity.ShoppingEntryTypeRequest
+              unmarshalType: com.redhat.example.type.ShoppingEntryTypeRequest
         - setProperty:
             id: setProperty-request
             expression:

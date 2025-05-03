@@ -1,5 +1,5 @@
 server:
-  port: 8280
+  port: 8282
 
 spring:
   datasource:
@@ -10,4 +10,3 @@ spring:
 
 camel-app:
   simulationdate: ${SIMURATION_DATE:}
-  

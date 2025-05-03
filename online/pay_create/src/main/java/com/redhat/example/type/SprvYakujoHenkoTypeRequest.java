@@ -1,0 +1,15 @@
+package com.redhat.example.type;
+
+import lombok.Data;
+
+@Data
+public class SprvYakujoHenkoTypeRequest {
+    /** 顧客番号 */
+    private String customer_number;
+
+    /** 請求締日 */
+    private String seikyu_shimebi;
+
+    /** 支払方法 */
+    private String pay_type;
+}

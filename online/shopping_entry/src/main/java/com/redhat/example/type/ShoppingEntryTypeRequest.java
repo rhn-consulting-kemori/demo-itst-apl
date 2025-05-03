@@ -1,4 +1,4 @@
-package com.redhat.example.entity;
+package com.redhat.example.type;
 
 import lombok.Data;
 

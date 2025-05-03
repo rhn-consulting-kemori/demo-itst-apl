@@ -1,0 +1,408 @@
+- route:
+    id: route-sp1-process
+    description: SP1請求作成
+    from:
+      id: from-http-entry-sp1
+      description: Pay Create Request
+      uri: rest
+      parameters:
+        consumes: application/json
+        inType: com.redhat.example.type.PayCreateTypeRequest
+        method: post
+        path: demo/pay_create/sp1
+      steps:
+        - log:
+            id: log-request-sp1
+            message: "Request: ${body}"
+        - to:
+            id: to-get-Information-sp1
+            uri: direct
+            parameters:
+              name: get-inf
+        - to:
+            id: to-bean-sp1
+            description: create pay record SP1
+            uri: bean
+            parameters:
+              beanName: createSp1PayRecordRule
+              method: createSp1PayRecord
+        - setProperty:
+            id: setProperty-pay_record-sp1
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record
+        - log:
+            id: log-pay_record-sp1
+            message: ${body}
+        - choice:
+            id: choice-sp1
+            otherwise:
+              id: otherwise-sp1
+              steps:
+                - to:
+                    id: to-insert-payrecord-sp1
+                    uri: sql
+                    parameters:
+                      query: INSERT INTO pay_record VALUES
+                        (:#${exchangeProperty.pay_record.customer_number},
+                        :#${exchangeProperty.pay_record.seikyu_shimebi},
+                        :#${exchangeProperty.pay_record.pay_date},
+                        :#${exchangeProperty.pay_record.pay_amount},
+                        :#${exchangeProperty.pay_record.sp1_pay_amount},
+                        :#${exchangeProperty.pay_record.sprv_pay_gankin},
+                        :#${exchangeProperty.pay_record.sprv_pay_tesuryo},
+                        :#${exchangeProperty.pay_record.sprv_togetu_zandaka},
+                        :#${exchangeProperty.pay_record.sprv_togetu_kurizan},
+                        :#${exchangeProperty.pay_record.sprv_jigetu_kurizan},
+                        :#${exchangeProperty.pay_record.sprv_init_furi_menjo},
+                        :#${exchangeProperty.pay_record.sprv_monthly_payamount},
+                        :#${exchangeProperty.pay_record.sprv_rate});
+            when:
+              - id: when-sp1
+                steps:
+                  - to:
+                      id: to-update-payrecord-sp1
+                      uri: sql
+                      parameters:
+                        query: UPDATE pay_record SET pay_amount =
+                          :#${exchangeProperty.pay_record.pay_amount},
+                          sp1_pay_amount =
+                          :#${exchangeProperty.pay_record.sp1_pay_amount} WHERE
+                          customer_number =
+                          :#${exchangeProperty.pay_record.customer_number} and
+                          seikyu_shimebi =
+                          :#${exchangeProperty.pay_record.seikyu_shimebi};
+                expression:
+                  simple:
+                    expression: ${exchangeProperty.payrecord_request.payrecord} != null
+        - log:
+            id: log-response-sp1
+            message: "Success: ${exchangeProperty.request}"
+        - transform:
+            id: transform-response-sp1
+            expression:
+              constant:
+                expression: '{"result": "success"}'
+- route:
+    id: route-get-inf
+    from:
+      id: from-get-inf
+      uri: direct
+      parameters:
+        name: get-inf
+      steps:
+        - unmarshal:
+            id: unmarshal-request
+            json:
+              unmarshalType: com.redhat.example.type.PayCreateTypeRequest
+        - setProperty:
+            id: setProperty-request
+            expression:
+              simple:
+                expression: ${body}
+            name: request
+        - to:
+            id: to-sql
+            description: customer access
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.CustomerEntity
+              outputType: SelectOne
+              query: SELECT * FROM customer WHERE customer_number =
+                :#${exchangeProperty.request.customer_number};
+        - setProperty:
+            id: setProperty-customer
+            expression:
+              simple:
+                expression: ${body}
+            name: customer
+        - to:
+            id: to-get_pay_record
+            description: get pay_record
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.PayRecordEntity
+              outputType: SelectOne
+              query: SELECT * FROM pay_record WHERE customer_number =
+                :#${exchangeProperty.request.customer_number} and seikyu_shimebi
+                = :#${exchangeProperty.request.seikyu_shimebi};
+        - setProperty:
+            id: setProperty-3560
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record_togetsu
+        - setBody:
+            id: setBody-3903
+            expression:
+              simple:
+                expression: ${exchangeProperty.request}
+        - to:
+            id: to-4228
+            uri: bean
+            parameters:
+              beanName: getPreShimeDataRule
+              method: getPreShimeDataTypeRequest
+        - setProperty:
+            id: setProperty-1692
+            expression:
+              simple:
+                expression: ${body}
+            name: pre_pay_record_request
+        - to:
+            id: to-pre-pay_record
+            description: get zengetsu pay_record
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.PayRecordEntity
+              outputType: SelectOne
+              query: SELECT * FROM pay_record WHERE customer_number =
+                :#${exchangeProperty.pre_pay_record_request.customer_number} and
+                seikyu_shimebi =
+                :#${exchangeProperty.pre_pay_record_request.seikyu_shimebi};
+        - setProperty:
+            id: setProperty-4284
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record_zengetsu
+        - process:
+            id: process-create-pay-record
+            description: create request
+            ref: "#class:com.redhat.example.processor.CreatePayRecordRequestProcessor"
+        - setProperty:
+            id: setProperty-payrecord_request
+            expression:
+              simple:
+                expression: ${body}
+            name: payrecord_request
+- route:
+    id: route-sprv-route
+    description: SPリボ請求作成
+    from:
+      id: from-http-entry-sprv
+      description: Pay Create Request
+      uri: rest
+      parameters:
+        consumes: application/json
+        inType: com.redhat.example.type.PayCreateTypeRequest
+        method: post
+        path: demo/pay_create/sprv
+      steps:
+        - log:
+            id: log-request-sprv
+            message: "Request: ${body}"
+        - to:
+            id: to-get-Information-sprv
+            uri: direct
+            parameters:
+              name: get-inf
+        - to:
+            id: to-bean-sprv
+            description: create pay record SPRV
+            uri: bean
+            parameters:
+              beanName: createSprvPayRecordRule
+              method: createSprvPayRecord
+        - setProperty:
+            id: setProperty-pay_record-sprv
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record
+        - log:
+            id: log-pay_record-sprv
+            message: ${body}
+        - choice:
+            id: choice-sprv
+            otherwise:
+              id: otherwise-sprv
+              steps:
+                - to:
+                    id: to-insert-payrecord-sprv
+                    uri: sql
+                    parameters:
+                      query: INSERT INTO pay_record VALUES
+                        (:#${exchangeProperty.pay_record.customer_number},
+                        :#${exchangeProperty.pay_record.seikyu_shimebi},
+                        :#${exchangeProperty.pay_record.pay_date},
+                        :#${exchangeProperty.pay_record.pay_amount},
+                        :#${exchangeProperty.pay_record.sp1_pay_amount},
+                        :#${exchangeProperty.pay_record.sprv_pay_gankin},
+                        :#${exchangeProperty.pay_record.sprv_pay_tesuryo},
+                        :#${exchangeProperty.pay_record.sprv_togetu_zandaka},
+                        :#${exchangeProperty.pay_record.sprv_togetu_kurizan},
+                        :#${exchangeProperty.pay_record.sprv_jigetu_kurizan},
+                        :#${exchangeProperty.pay_record.sprv_init_furi_menjo},
+                        :#${exchangeProperty.pay_record.sprv_monthly_payamount},
+                        :#${exchangeProperty.pay_record.sprv_rate});
+            when:
+              - id: when-sprv
+                steps:
+                  - to:
+                      id: to-update-payrecord-sprv
+                      uri: sql
+                      parameters:
+                        query: UPDATE pay_record SET pay_amount =
+                          :#${exchangeProperty.pay_record.pay_amount},
+                          sprv_pay_gankin =
+                          :#${exchangeProperty.pay_record.sprv_pay_gankin},
+                          sprv_pay_tesuryo =
+                          :#${exchangeProperty.pay_record.sprv_pay_tesuryo},
+                          sprv_togetu_zandaka =
+                          :#${exchangeProperty.pay_record.sprv_togetu_zandaka},
+                          sprv_togetu_kurizan =
+                          :#${exchangeProperty.pay_record.sprv_togetu_kurizan},
+                          sprv_jigetu_kurizan =
+                          :#${exchangeProperty.pay_record.sprv_jigetu_kurizan}
+                          WHERE customer_number =
+                          :#${exchangeProperty.pay_record.customer_number} and
+                          seikyu_shimebi =
+                          :#${exchangeProperty.pay_record.seikyu_shimebi};
+                expression:
+                  simple:
+                    expression: ${exchangeProperty.payrecord_request.payrecord} != null
+        - log:
+            id: log-response-sprv
+            message: "Success: ${exchangeProperty.request}"
+        - transform:
+            id: transform-response-sprv
+            expression:
+              constant:
+                expression: '{"result": "success"}'
+- route:
+    id: route-get-inf-yakujo
+    description: 約定向け情報取得
+    from:
+      id: from-get-inf-yakujo
+      uri: direct
+      parameters:
+        name: get-inf-yakujo
+      steps:
+        - unmarshal:
+            id: unmarshal-request-yakujo
+            json:
+              unmarshalType: com.redhat.example.type.SprvYakujoHenkoTypeRequest
+        - setProperty:
+            id: setProperty-request-yakujo
+            expression:
+              simple:
+                expression: ${body}
+            name: request_yakujo
+        - to:
+            id: to-sql-yakujo
+            description: customer access
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.CustomerEntity
+              outputType: SelectOne
+              query: SELECT * FROM customer WHERE customer_number =
+                :#${exchangeProperty.request_yakujo.customer_number};
+        - setProperty:
+            id: setProperty-customer-yakujo
+            expression:
+              simple:
+                expression: ${body}
+            name: customer
+        - to:
+            id: to-get_pay_record-yakujo
+            description: get pay_record
+            uri: sql
+            parameters:
+              outputClass: com.redhat.example.entity.PayRecordEntity
+              outputType: SelectOne
+              query: SELECT * FROM pay_record WHERE customer_number =
+                :#${exchangeProperty.request_yakujo.customer_number} and
+                seikyu_shimebi =
+                :#${exchangeProperty.request_yakujo.seikyu_shimebi};
+        - setProperty:
+            id: setProperty-tougetsu-yakujo
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record_togetsu
+        - process:
+            id: process-create-pay-record-yakujo
+            description: create request
+            ref: "#class:com.redhat.example.processor.YakujoPayRecordRequestProcessor"
+        - setProperty:
+            id: setProperty-payrecord_request-yakujo
+            expression:
+              simple:
+                expression: ${body}
+            name: payrecord_request_yakujo
+- route:
+    id: route-sprv-yakujo-route
+    description: SPリボ約定変更
+    from:
+      id: from-http-entry-sprv-yakujo
+      description: Yakujo Henko Request
+      uri: rest
+      parameters:
+        consumes: application/json
+        inType: com.redhat.example.type.SprvYakujoHenkoTypeRequest
+        method: post
+        path: demo/yakujo_henko/sprv
+      steps:
+        - log:
+            id: log-request-sprv-yakujo
+            message: "Request: ${body}"
+        - to:
+            id: to-get-Information-sprv-yakujo
+            uri: direct
+            parameters:
+              name: get-inf-yakujo
+        - to:
+            id: to-bean-sprv-yakujo
+            description: yakujo pay record SPRV
+            uri: bean
+            parameters:
+              beanName: yakujoSprvPayRecordRule
+              method: yakujoSprvPayRecord
+        - setProperty:
+            id: setProperty-pay_record-sprv-yakujo
+            expression:
+              simple:
+                expression: ${body}
+            name: pay_record
+        - log:
+            id: log-pay_record-sprv-yakujo
+            message: ${body}
+        - choice:
+            id: choice-3639
+            otherwise:
+              id: otherwise-1255
+              steps:
+                - log:
+                    id: log-8866
+                    message: pay_record Nothing
+            when:
+              - id: when-4970
+                steps:
+                  - to:
+                      id: to-update-payrecord-sprv-yakujo
+                      uri: sql
+                      parameters:
+                        query: UPDATE pay_record SET pay_amount = :#${exchangeProperty.pay_record.pay_amount}, 
+                          sprv_pay_gankin = :#${exchangeProperty.pay_record.sprv_pay_gankin},
+                          sprv_pay_tesuryo = :#${exchangeProperty.pay_record.sprv_pay_tesuryo},
+                          sprv_togetu_zandaka = :#${exchangeProperty.pay_record.sprv_togetu_zandaka},
+                          sprv_togetu_kurizan = :#${exchangeProperty.pay_record.sprv_togetu_kurizan},
+                          sprv_jigetu_kurizan = :#${exchangeProperty.pay_record.sprv_jigetu_kurizan},
+                          sprv_init_furi_menjo = :#${exchangeProperty.pay_record.sprv_init_furi_menjo},
+                          sprv_monthly_payamount = :#${exchangeProperty.pay_record.sprv_monthly_payamount},
+                          sprv_rate = :#${exchangeProperty.pay_record.sprv_rate} 
+                          WHERE customer_number = :#${exchangeProperty.pay_record.customer_number} and seikyu_shimebi = :#${exchangeProperty.pay_record.seikyu_shimebi};
+                expression:
+                  simple:
+                    expression: ${exchangeProperty.pay_record} != null
+        
+        - log:
+            id: log-response-sprv-yakujo
+            message: "Success: ${exchangeProperty.request}"
+        - transform:
+            id: transform-response-sprv-yakujo
+            expression:
+              constant:
+                expression: '{"result": "success"}'
