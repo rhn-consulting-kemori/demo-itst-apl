@@ -1,0 +1,74 @@
+- route:
+    id: route-process
+    description: 売上請求作成
+    from:
+      id: from-file
+      description: 売上明細ファイル取得
+      uri: file
+      parameters:
+        delete: true
+        directoryName: data/
+        fileName: shopping_put_data.txt
+      steps:
+        - split:
+            id: split-uriage-record
+            steps:
+              - log:
+                  id: log-request
+                  message: "request: ${body}"
+              - unmarshal:
+                  id: unmarshal-request
+                  json:
+                    unmarshalType: com.redhat.example.entity.ShoppingRecordEntity
+              - setProperty:
+                  id: setProperty-request
+                  name: request
+                  simple:
+                    expression: ${body}
+              - setBody:
+                  id: setBody-api-request
+                  description: APIリクエスト作成
+                  simple:
+                    expression: '{"customer_number": "${exchangeProperty.request.customer_number}",
+                      "pay_type": "${exchangeProperty.request.pay_type}",
+                      "seikyu_shimebi":
+                      "${exchangeProperty.request.seikyu_shimebi}", "use_date":
+                      "${exchangeProperty.request.use_date}", "use_amount":
+                      ${exchangeProperty.request.use_amount}}'
+              - choice:
+                  id: choice-pay-type
+                  description: 支払方法で分岐
+                  otherwise:
+                    id: otherwise-sp1
+                    description: SP1回の場合
+                    steps:
+                      - to:
+                          id: to-api-sp1
+                          description: Call pay_record sp1
+                          uri: http
+                          parameters:
+                            httpMethod: POST
+                            httpUri: "{{camel-app.url_pay_create_sp1}}"
+                  when:
+                    - id: when-sprv
+                      description: SPリボの場合
+                      steps:
+                        - to:
+                            id: to-api-sprv
+                            description: Call pay_record sprv
+                            uri: http
+                            parameters:
+                              httpMethod: POST
+                              httpUri: "{{camel-app.url_pay_create_sprv}}"
+                      simple:
+                        expression: ${exchangeProperty.request.pay_type} == "SPリボ"
+              - log:
+                  id: log-result
+                  description: 結果表示
+                  message: "result: ${exchangeProperty.request} -> ${body}"
+            tokenize:
+              token: \n
+        - process:
+            id: process-finish
+            description: バッチ処理終了
+            ref: "#class:com.redhat.example.processor.CamelStopProcessor"

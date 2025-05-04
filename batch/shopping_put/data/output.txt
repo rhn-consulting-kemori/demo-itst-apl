@@ -1,1 +1,0 @@
-{"shopping_number":1,"customer_number":"0000000001","use_card_number":"354000000001","seikyu_shimebi":"20250515","pay_type":"SPリボ","use_date":"20250501","shop_name":"Red Hat","use_amount":50000}

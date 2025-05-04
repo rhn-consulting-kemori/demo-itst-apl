@@ -69,7 +69,7 @@
                     appendChars: \n
                     directoryName: data/
                     fileExist: Append
-                    fileName: output.txt
+                    fileName: shopping_put_data.txt
               - log:
                   id: log-record-done
                   message: "Done: ${body}"
