@@ -1,0 +1,14 @@
+server:
+  port: 8285
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost/postgres}
+    username: ${DB_USER_NAME:postgres}
+    password: ${DB_PASSWARD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+
+camel-app:
+  simulationdate: ${SIMURATION_DATE:}
+  seikyushimebi: ${SEIKYU_SHIMEBI:}
+  

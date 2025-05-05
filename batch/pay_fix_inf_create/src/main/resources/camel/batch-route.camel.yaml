@@ -1,0 +1,88 @@
+- route:
+    id: route-process
+    description: 請求実績作成
+    from:
+      id: from-timer
+      description: start
+      uri: timer
+      parameters:
+        repeatCount: "1"
+        timerName: start-timer
+      steps:
+        - to:
+            id: to-set-seikyushime
+            description: 請求締日設定
+            uri: bean
+            parameters:
+              beanName: setTargetSeikyuShimebiRule
+              method: getTargetShimebi
+        - setProperty:
+            id: setProperty-shime
+            name: seikyu_shimebi
+            simple:
+              expression: ${body}
+        - log:
+            id: log-shime
+            message: "seikyu_shimebi: ${body}"
+        - to:
+            id: to-select-pay-record
+            description: pay_record取得
+            uri: sql
+            parameters:
+              query: SELECT * FROM pay_record WHERE seikyu_shimebi =
+                :#${exchangeProperty.seikyu_shimebi};
+        - split:
+            id: split-pay-record
+            steps:
+              - to:
+                  id: to-pay-record-convert
+                  uri: bean
+                  parameters:
+                    beanName: setPayRecordRule
+                    method: executeRule
+              - setProperty:
+                  id: setProperty-pay-record
+                  name: pay_record
+                  simple:
+                    expression: ${body}
+              - log:
+                  id: log-pay-record
+                  message: ${body}
+              - to:
+                  id: to-select-customer
+                  description: customer取得
+                  uri: sql
+                  parameters:
+                    allowNamedParameters: true
+                    outputClass: com.redhat.example.entity.CustomerEntity
+                    outputType: SelectOne
+                    query: SELECT * FROM customer WHERE customer_number =
+                      :#${exchangeProperty.pay_record.customer_number};
+              - setProperty:
+                  id: setProperty-customer
+                  name: customer
+                  simple:
+                    expression: ${body}
+              - log:
+                  id: log-customer
+                  message: ${body}
+              - to:
+                  id: to-pay-fix-inf
+                  description: insert pay_fix_inf
+                  uri: sql
+                  parameters:
+                    allowNamedParameters: true
+                    query: INSERT INTO pay_fix_inf VALUES
+                      (:#${exchangeProperty.pay_record.customer_number},:#${exchangeProperty.pay_record.seikyu_shimebi},:#${exchangeProperty.pay_record.pay_date},:#${exchangeProperty.pay_record.pay_amount},:#${exchangeProperty.pay_record.sp1_pay_amount},:#${exchangeProperty.pay_record.sprv_pay_gankin},:#${exchangeProperty.pay_record.sprv_pay_tesuryo},:#${exchangeProperty.customer.card_number},:#${exchangeProperty.customer.customer_name},:#${exchangeProperty.customer.customer_address},:#${exchangeProperty.customer.sprv_limit_amount},:#${exchangeProperty.pay_record.sprv_togetu_zandaka},:#${exchangeProperty.pay_record.sprv_togetu_kurizan},:#${exchangeProperty.pay_record.sprv_jigetu_kurizan},:#${exchangeProperty.pay_record.sprv_init_furi_menjo},:#${exchangeProperty.pay_record.sprv_monthly_payamount},:#${exchangeProperty.pay_record.sprv_rate});
+              - log:
+                  id: log-insert
+                  message: insert complete
+            simple:
+              expression: ${body}
+        - log:
+            id: log-finish
+            message: '{"result": "success"}'
+        - process:
+            id: process-stop
+            description: バッチ処理終了
+            ref: "#class:com.redhat.example.processor.CamelStopProcessor"
