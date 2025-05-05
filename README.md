@@ -19,3 +19,5 @@
 * podman build -t shopping_pay_create .
 * podman run --name shopping_pay_create_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d shopping_pay_create
 ### yakujo_henko 8284
+* podman build -t yakujo_henko .
+* podman run --name yakujo_henko_srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d yakujo_henko

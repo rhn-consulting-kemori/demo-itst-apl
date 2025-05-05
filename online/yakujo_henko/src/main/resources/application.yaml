@@ -1,0 +1,13 @@
+server:
+  port: 8284
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost/postgres}
+    username: ${DB_USER_NAME:postgres}
+    password: ${DB_PASSWARD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+
+camel-app:
+  simulationdate: ${SIMURATION_DATE:}
+  url_yakujo_henko_sprv: ${YAKUJO_HENKO_SPRV:localhost:8282/camel/demo/yakujo_henko/sprv}

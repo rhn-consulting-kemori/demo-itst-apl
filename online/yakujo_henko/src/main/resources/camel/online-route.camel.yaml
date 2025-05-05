@@ -1,0 +1,154 @@
+- route:
+    id: route-process
+    description: 約定変更
+    from:
+      id: from-api-yakujohenko
+      description: 約定変更
+      uri: rest
+      parameters:
+        consumes: application/json
+        method: post
+        path: demo/yakujohenko/entry
+      steps:
+        - unmarshal:
+            id: unmarshal-request
+            json:
+              unmarshalType: com.redhat.example.type.YakujoHenkoTypeRequest
+        - setProperty:
+            id: setProperty-request
+            name: request
+            simple:
+              expression: ${body}
+        - log:
+            id: log-request
+            message: "request: ${body}"
+        - setBody:
+            id: setBody-check
+            simple:
+              expression: ${exchangeProperty.request}
+        - to:
+            id: to-bean-check
+            description: 入力精査
+            uri: bean
+            parameters:
+              beanName: yakujoHenkoCheckRule
+              method: check
+        - choice:
+            id: choice-check
+            otherwise:
+              id: otherwise-check
+              description: Check NG
+              steps:
+                - log:
+                    id: log-check-ng
+                    message: "Check NG: ${exchangeProperty.request}"
+                - transform:
+                    id: transform-check-ng-return
+                    constant:
+                      expression: '{"result": "failed"}'
+            when:
+              - id: when-check
+                description: Check OK
+                steps:
+                  - to:
+                      id: to-sql-customer
+                      description: get customer
+                      uri: sql
+                      parameters:
+                        allowNamedParameters: true
+                        outputClass: com.redhat.example.entity.CustomerEntity
+                        outputType: SelectOne
+                        query: SELECT * FROM customer WHERE customer_number =
+                          :#${exchangeProperty.request.customer_number}
+                  - setProperty:
+                      id: setProperty-customer
+                      name: customer
+                      simple:
+                        expression: ${body}
+                  - process:
+                      id: process-yakujo-image
+                      ref: "#class:com.redhat.example.processor.SetYakujoImageProcessor"
+                  - to:
+                      id: to-create-image-bean
+                      uri: bean
+                      parameters:
+                        beanName: setHenkoYakujoImageRule
+                        method: getHenkoYakujoImage
+                  - setProperty:
+                      id: setProperty-history
+                      name: yakujo_henko_history
+                      simple:
+                        expression: ${body}
+                  - log:
+                      id: log-1471
+                      message: ${body}
+                  - to:
+                      id: to-update-customer
+                      description: customer更新
+                      uri: sql
+                      parameters:
+                        allowNamedParameters: true
+                        query: UPDATE customer SET sprv_limit_amount =
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_limit_amount},
+                          sprv_init_furi_menjo =
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_init_furi_menjo},
+                          sprv_monthly_payamount =
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_monthly_payamount},
+                          sprv_rate =
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_rate}
+                          WHERE customer_number =
+                          :#${exchangeProperty.yakujo_henko_history.customer_number};
+                  - log:
+                      id: log-update-customer
+                      message: "update-success: customer -
+                        ${exchangeProperty.request.customer_number}"
+                  - to:
+                      id: to-insert-yakujo-henko-history
+                      description: yakujo_henko_history登録
+                      uri: sql
+                      parameters:
+                        allowNamedParameters: true
+                        query: INSERT INTO yakujo_henko_history
+                          (customer_number,change_date,pay_change_seikyu_shimebi,before_sprv_limit_amount,before_sprv_init_furi_menjo,before_sprv_monthly_payamount,before_sprv_rate,after_sprv_limit_amount,after_sprv_init_furi_menjo,after_sprv_monthly_payamount,after_sprv_rate)
+                          VALUES
+                          (:#${exchangeProperty.yakujo_henko_history.customer_number},
+                          :#${exchangeProperty.yakujo_henko_history.change_date},
+                          :#${exchangeProperty.yakujo_henko_history.pay_change_seikyu_shimebi},
+                          :#${exchangeProperty.yakujo_henko_history.before_sprv_limit_amount},
+                          :#${exchangeProperty.yakujo_henko_history.before_sprv_init_furi_menjo},
+                          :#${exchangeProperty.yakujo_henko_history.before_sprv_monthly_payamount},
+                          :#${exchangeProperty.yakujo_henko_history.before_sprv_rate},
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_limit_amount},
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_init_furi_menjo},
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_monthly_payamount},
+                          :#${exchangeProperty.yakujo_henko_history.after_sprv_rate}
+                          );
+                  - log:
+                      id: log-insert-yakujo-henko-history
+                      message: "Insert-success : yakujo_henko_history ->
+                        ${exchangeProperty.yakujo_henko_history}"
+                  - setBody:
+                      id: setBody-call-api
+                      simple:
+                        expression: '{"customer_number":
+                          "${exchangeProperty.yakujo_henko_history.customer_number}",
+                          "seikyu_shimebi":
+                          "${exchangeProperty.yakujo_henko_history.pay_change_seikyu_shimebi}",
+                          "pay_type": "SPリボ"}'
+                  - to:
+                      id: to-http
+                      description: 請求反映
+                      uri: http
+                      parameters:
+                        bridgeEndpoint: true
+                        httpMethod: POST
+                        httpUri: "{{camel-app.url_yakujo_henko_sprv}}"
+                  - log:
+                      id: log-2255
+                      message: call-api :${body}
+                  - transform:
+                      id: transform-response-ok
+                      constant:
+                        expression: '{"result": "success"}'
+                simple:
+                  expression: ${body} == true
