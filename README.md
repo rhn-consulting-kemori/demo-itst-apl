@@ -21,3 +21,12 @@
 ### yakujo_henko 8284
 * podman build -t yakujo_henko .
 * podman run --name yakujo_henko_srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d yakujo_henko
+### pay_fix_inf_create 8285
+* podman build -t pay_fix_inf_create .
+* podman run --name pay_fix_inf_create_job --pod demo-itst-pod -e SIMURATION_DATE=＠ -d pay_fix_inf_create
+### pay_fix_doc_create 8286
+* podman build -t pay_fix_doc_create .
+* podman run --name pay_fix_doc_create_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay_fix_doc_create
+### pay_fix_get 8287
+* podman build -t pay_fix_get .
+* podman run --name pay_fix_get_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay_fix_get

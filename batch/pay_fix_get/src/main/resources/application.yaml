@@ -1,0 +1,15 @@
+server:
+  port: 8286
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost/postgres}
+    username: ${DB_USER_NAME:postgres}
+    password: ${DB_PASSWARD:postgres}
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+
+camel-app:
+  simulationdate: ${SIMURATION_DATE:}
+  seikyushimebi: ${SEIKYU_SHIMEBI:}
+  payfixfilename: ${OUTPUT_FILENAME:pay_fix_file.txt}
+  deletefilepath: ${DELETE_FILEPATH:data/pay_fix_file.txt}

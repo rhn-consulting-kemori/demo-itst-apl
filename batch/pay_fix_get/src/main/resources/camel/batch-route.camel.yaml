@@ -1,0 +1,80 @@
+- route:
+    id: route-process
+    description: 請求明細書作成
+    from:
+      id: from-timer
+      description: start
+      uri: timer
+      parameters:
+        repeatCount: "1"
+        timerName: timer-start
+      steps:
+        - process:
+            id: process-delete-file
+            description: ファイル削除
+            ref: "#class:com.redhat.example.processor.CamelFileCleanProcessor"
+        - to:
+            id: to-set-shime
+            description: 請求締日設定
+            uri: bean
+            parameters:
+              beanName: setTargetSeikyuShimebiRule
+              method: getTargetShimebi
+        - setProperty:
+            id: setProperty-seikyu-shimebi
+            name: seikyu_shimebi
+            simple:
+              expression: ${body}
+        - log:
+            id: log-3840
+            message: "seikyu_shimebi: ${body}"
+        - to:
+            id: to-sql-pay-fix-inf
+            description: 請求実績取得
+            uri: sql
+            parameters:
+              allowNamedParameters: true
+              query: SELECT * FROM pay_fix_inf WHERE seikyu_shimebi =
+                :#${exchangeProperty.seikyu_shimebi};
+        - split:
+            id: split-pay-fix-inf
+            steps:
+              - to:
+                  id: to-bean-pay-fix-inf
+                  description: 請求実績設定
+                  uri: bean
+                  parameters:
+                    beanName: setPayFixInfRule
+                    method: executeRule
+              - setProperty:
+                  id: setProperty-pay-fix-inf
+                  name: pay_fix_inf
+                  simple:
+                    expression: ${body}
+              - log:
+                  id: log-pay-fix-inf
+                  message: "pay_fix_inf: ${body}"
+              - setBody:
+                  id: setBody-data1
+                  description: 請求データセット
+                  simple:
+                    expression: |
+                      ${exchangeProperty.pay_fix_inf.customer_number}${exchangeProperty.pay_fix_inf.card_number}${exchangeProperty.pay_fix_inf.seikyu_shimebi}${exchangeProperty.pay_fix_inf.pay_date}
+              - to:
+                  id: to-data
+                  description: データ出力
+                  uri: file
+                  parameters:
+                    appendChars: \n
+                    directoryName: data/
+                    fileExist: Append
+                    fileName: "{{camel-app.payfixfilename}}"
+            simple:
+              expression: ${body}
+        - log:
+            id: log-finish
+            message: '{"result": "success"}'
+        - process:
+            id: process-stop
+            description: バッチ処理終了
+            ref: "#class:com.redhat.example.processor.CamelStopProcessor"
