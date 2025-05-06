@@ -30,3 +30,6 @@
 ### pay_fix_get 8287
 * podman build -t pay_fix_get .
 * podman run --name pay_fix_get_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay_fix_get
+### demo_apl_viewer 8288
+* podman build -t demo_apl_viewer .
+* podman run --name demo_apl_viewer_srv --pod demo-itst-pod -d demo_apl_viewer
