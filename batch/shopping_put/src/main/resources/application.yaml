@@ -10,4 +10,5 @@ spring:
 
 camel-app:
   simulationdate: ${SIMURATION_DATE:}
-  
+  outputfilename: ${OUTPUT_FILENAME:shopping_put_data.txt}
+  deletefilepath: ${DELETE_FILEPATH:data/shopping_put_data.txt}

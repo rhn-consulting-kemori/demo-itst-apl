@@ -11,5 +11,6 @@ public class AppConfig {
     
     /** Config Parameter */
     private String simulationdate;
-    
+    private String outputfilename;
+    private String deletefilepath;
 }

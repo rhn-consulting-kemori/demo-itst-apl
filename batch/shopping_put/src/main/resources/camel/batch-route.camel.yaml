@@ -13,6 +13,10 @@
         - log:
             id: log-start
             message: "[START] shopping_put"
+        - process:
+            id: process-delete-file
+            description: ファイル削除
+            ref: "#class:com.redhat.example.processor.CamelFileCleanProcessor"
         - to:
             id: to-get_shopping_entry
             description: Get shopping_entry
@@ -69,7 +73,7 @@
                     appendChars: \n
                     directoryName: data/
                     fileExist: Append
-                    fileName: shopping_put_data.txt
+                    fileName: "{{camel-app.outputfilename}}"
               - log:
                   id: log-record-done
                   message: "Done: ${body}"
