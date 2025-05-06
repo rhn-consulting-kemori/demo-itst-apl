@@ -6,30 +6,30 @@
 * podman run --name postgres-itst --pod demo-itst-pod -e POSTGRES_PASSWORD=＠ -d postgres:16
 * podman exec -it postgres-srv bash
 * psql -U postgres
-### shopping_entry 8280
-* podman build -t shopping_entry .
-* podman run --name shopping_entry_srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d shopping_entry
-### shopping_put 8281
-* podman build -t shopping_put .
-* podman run --name shopping_put_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d shopping_put
-### pay_create 8282
-* podman build -t pay_create .
-* podman run --name pay_create_srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d pay_create
-### shopping_pay_create 8283
-* podman build -t shopping_pay_create .
-* podman run --name shopping_pay_create_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d shopping_pay_create
-### yakujo_henko 8284
-* podman build -t yakujo_henko .
-* podman run --name yakujo_henko_srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d yakujo_henko
-### pay_fix_inf_create 8285
-* podman build -t pay_fix_inf_create .
-* podman run --name pay_fix_inf_create_job --pod demo-itst-pod -e SIMURATION_DATE=＠ -d pay_fix_inf_create
-### pay_fix_doc_create 8286
-* podman build -t pay_fix_doc_create .
-* podman run --name pay_fix_doc_create_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay_fix_doc_create
-### pay_fix_get 8287
-* podman build -t pay_fix_get .
-* podman run --name pay_fix_get_job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay_fix_get
-### demo_apl_viewer 8288
-* podman build -t demo_apl_viewer .
-* podman run --name demo_apl_viewer_srv --pod demo-itst-pod -d demo_apl_viewer
+### shopping-entry 8280
+* podman build -t shopping-entry .
+* podman run --name shopping-entry-srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d shopping-entry
+### shopping-put 8281
+* podman build -t shopping-put .
+* podman run --name shopping-put-job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d shopping-put
+### pay-create 8282
+* podman build -t pay-create .
+* podman run --name pay-create-srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d pay-create
+### shopping-pay-create 8283
+* podman build -t shopping-pay-create .
+* podman run --name shopping-pay-create-job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d shopping-pay-create
+### yakujo-henko 8284
+* podman build -t yakujo-henko .
+* podman run --name yakujo-henko-srv --pod demo-itst-pod -e SIMURATION_DATE=＠ -d yakujo-henko
+### pay-fix-inf-create 8285
+* podman build -t pay-fix-inf-create .
+* podman run --name pay-fix-inf_-create-job --pod demo-itst-pod -e SIMURATION_DATE=＠ -d pay-fix-inf-create
+### pay-fix-doc-create 8286
+* podman build -t pay-fix-doc-create .
+* podman run --name pay-fix-doc-create-job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay-fix-doc-create
+### pay-fix-get 8287
+* podman build -t pay-fix-get .
+* podman run --name pay-fix-get-job --pod demo-itst-pod --volume /Users-Path:/app/data -e SIMURATION_DATE=＠ -d pay-fix-get
+### demo-apl-viewer 8288
+* podman build -t demo-apl-viewer .
+* podman run --name demo-apl-viewer-srv --pod demo-itst-pod -d demo-apl-viewer
