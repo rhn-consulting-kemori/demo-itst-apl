@@ -1,5 +1,5 @@
 server:
-  port: 8285
+  port: 8286
 
 spring:
   datasource:
@@ -10,4 +10,6 @@ spring:
 
 camel-app:
   simulationdate: ${SIMURATION_DATE:}
+  seikyushimebi: ${SEIKYU_SHIMEBI:}
+  payfixdocfilename: ${DOC_FILENAME:pay_fix_doc.txt}
   
