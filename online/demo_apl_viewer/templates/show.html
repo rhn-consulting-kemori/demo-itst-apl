@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<base target="_top">
+<title>Demo APL Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Demo APL Viewer">
+</head>
+
+<body>
+
+<div id="container">
+<div id="contents">
+<section id="category">
+
+<h2>顧客詳細</h2>
+<div class="list">
+  <h3>顧客情報</h3>
+  <table class="ta1">
+    <tr><th>顧客番号</th><th>カード番号</th><th>氏名</th><th>住所</th></tr>
+    <tr>
+        <td>{{ customer.customer_number }}</td>
+        <td>{{ customer.card_number }}</td>
+        <td>{{ customer.customer_name }}</td>
+        <td>{{ customer.customer_address }}</td>
+    </tr>
+  </table>
+
+  <h3>SPリボ約定情報</h3>
+  <table class="ta1">
+    <tr><th>利用限度額</th><th>初回付利免除</th><th>毎月返済額</th><th>手数料率</th></tr>
+    <tr>
+        <td>{{ customer.sprv_limit_amount }}</td>
+        <td>{{ customer.sprv_init_furi_menjo }}</td>
+        <td>{{ customer.sprv_monthly_payamount }}</td>
+        <td>{{ customer.sprv_rate }}</td>
+    </tr>
+  </table>
+  <br/>
+
+  <h3>約定変更履歴</h3>
+  <table class="ta1">
+    <tr>
+        <th>履歴SEQ</th><th>変更日</th><th>適用請求締</th>
+        <th>限度額前</th><th>初回付利免除前</th><th>毎月返済額前</th><th>手数料率前</th>
+        <th>限度額後</th><th>初回付利免除後</th><th>毎月返済額後</th><th>手数料率後</th>
+    </tr>
+    {% for yakujo_henko_history in yakujo_henko_historys %}
+      <tr>
+        <td>{{ yakujo_henko_history.history_seq }}</td>
+        <td>{{ yakujo_henko_history.change_date }}</td>
+        <td>{{ yakujo_henko_history.pay_change_seikyu_shimebi }}</td>
+        <td>{{ yakujo_henko_history.before_sprv_limit_amount }}</td>
+        <td>{{ yakujo_henko_history.before_sprv_init_furi_menjo }}</td>
+        <td>{{ yakujo_henko_history.before_sprv_monthly_payamount }}</td>
+        <td>{{ yakujo_henko_history.before_sprv_rate }}</td>
+        <td>{{ yakujo_henko_history.after_sprv_limit_amount }}</td>
+        <td>{{ yakujo_henko_history.after_sprv_init_furi_menjo }}</td>
+        <td>{{ yakujo_henko_history.after_sprv_monthly_payamount }}</td>
+        <td>{{ yakujo_henko_history.after_sprv_rate }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br/>
+
+  <h3>売上受付</h3>
+  <table class="ta1">
+    <tr><th>売上番号</th><th>利用カード番号</th><th>利用日</th><th>加盟店名</th><th>利用金額</th><th>支払方法</th></tr>
+    {% for shopping_entry in shopping_entrys %}
+      <tr>
+        <td>{{ shopping_entry.shopping_number }}</td>
+        <td>{{ shopping_entry.use_card_number }}</td>
+        <td>{{ shopping_entry.use_date }}</td>
+        <td>{{ shopping_entry.shop_name }}</td>
+        <td>{{ shopping_entry.use_amount }}</td>
+        <td>{{ shopping_entry.pay_type }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h3>売上明細</h3>
+  <table class="ta1">
+    <tr><th>売上番号</th><th>請求締日</th><th>支払方法</th><th>利用カード番号</th><th>利用日</th><th>加盟店名</th><th>利用金額</th></tr>
+    {% for shopping_record in shopping_records %}
+      <tr>
+        <td>{{ shopping_record.shopping_number }}</td>
+        <td>{{ shopping_record.seikyu_shimebi }}</td>
+        <td>{{ shopping_record.pay_type }}</td>
+        <td>{{ shopping_record.use_card_number }}</td>
+        <td>{{ shopping_record.use_date }}</td>
+        <td>{{ shopping_record.shop_name }}</td>
+        <td>{{ shopping_record.use_amount }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br/>
+
+  <h3>請求</h3>
+  <table class="ta1">
+    <tr><th>請求締日</th><th>決済日</th><th>請求額</th><th>SP1回請求額</th><th>SPリボ請求元本</th><th>SPリボ請求手数料</th></tr>
+    {% for pay_record in pay_records %}
+      <tr>
+        <td>{{ pay_record.seikyu_shimebi }}</td>
+        <td>{{ pay_record.pay_date }}</td>
+        <td>{{ pay_record.pay_amount }}</td>
+        <td>{{ pay_record.sp1_pay_amount }}</td>
+        <td>{{ pay_record.sprv_pay_gankin }}</td>
+        <td>{{ pay_record.sprv_pay_tesuryo }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h3>SPリボ請求情報</h3>
+  <table class="ta1">
+    <tr>
+        <th>請求締日</th><th>決済日</th><th>請求元本</th><th>請求手数料</th>
+        <th>当月新規</th><th>当月繰越</th><th>次月繰越</th>
+        <th>初回付利免除</th><th>毎月返済額</th><th>手数料率</th>
+    </tr>
+    {% for pay_record in pay_records %}
+      <tr>
+        <td>{{ pay_record.seikyu_shimebi }}</td>
+        <td>{{ pay_record.pay_date }}</td>
+        <td>{{ pay_record.sprv_pay_gankin }}</td>
+        <td>{{ pay_record.sprv_pay_tesuryo }}</td>
+        <td>{{ pay_record.sprv_togetu_zandaka }}</td>
+        <td>{{ pay_record.sprv_togetu_kurizan }}</td>
+        <td>{{ pay_record.sprv_jigetu_kurizan }}</td>
+        <td>{{ pay_record.sprv_init_furi_menjo }}</td>
+        <td>{{ pay_record.sprv_monthly_payamount }}</td>
+        <td>{{ pay_record.sprv_rate }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br/>
+
+  <h3>請求実績</h3>
+  <table class="ta1">
+    <tr><th>請求締日</th><th>決済日</th><th>請求額</th><th>SP1回請求額</th><th>SPリボ請求元本</th><th>SPリボ請求手数料</th></tr>
+    {% for pay_fix_inf in pay_fix_infs %}
+      <tr>
+        <td>{{ pay_fix_inf.seikyu_shimebi }}</td>
+        <td>{{ pay_fix_inf.pay_date }}</td>
+        <td>{{ pay_fix_inf.pay_amount }}</td>
+        <td>{{ pay_fix_inf.sp1_pay_amount }}</td>
+        <td>{{ pay_fix_inf.sprv_pay_gankin }}</td>
+        <td>{{ pay_fix_inf.sprv_pay_tesuryo }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h3>請求時宛名</h3>
+  <table class="ta1">
+    <tr><th>請求締日</th><th>決済日</th><th>カード番号</th><th>氏名</th><th>住所</th></tr>
+    {% for pay_fix_inf in pay_fix_infs %}
+      <tr>
+        <td>{{ pay_fix_inf.seikyu_shimebi }}</td>
+        <td>{{ pay_fix_inf.pay_date }}</td>
+        <td>{{ pay_fix_inf.card_number }}</td>
+        <td>{{ pay_fix_inf.customer_name }}</td>
+        <td>{{ pay_fix_inf.customer_address }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h3>SPリボ請求実績</h3>
+  <table class="ta1">
+    <tr>
+        <th>請求締日</th><th>決済日</th><th>請求元本</th><th>請求手数料</th>
+        <th>当月新規</th><th>当月繰越</th><th>次月繰越</th>
+        <th>初回付利免除</th><th>毎月返済額</th><th>手数料率</th>
+    </tr>
+    {% for pay_fix_inf in pay_fix_infs %}
+      <tr>
+        <td>{{ pay_fix_inf.seikyu_shimebi }}</td>
+        <td>{{ pay_fix_inf.pay_date }}</td>
+        <td>{{ pay_fix_inf.sprv_pay_gankin }}</td>
+        <td>{{ pay_fix_inf.sprv_pay_tesuryo }}</td>
+        <td>{{ pay_fix_inf.sprv_togetu_zandaka }}</td>
+        <td>{{ pay_fix_inf.sprv_togetu_kurizan }}</td>
+        <td>{{ pay_fix_inf.sprv_jigetu_kurizan }}</td>
+        <td>{{ pay_fix_inf.sprv_init_furi_menjo }}</td>
+        <td>{{ pay_fix_inf.sprv_monthly_payamount }}</td>
+        <td>{{ pay_fix_inf.sprv_rate }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+</div>
+
+</section>
+<!--/#category-->
+<p class="centered-text"><input type="button" value="戻る" onclick="location.href = '/';"></p>
+</div>
+<!--/#contents-->
+
+</div>
+<!--/#container-->
+
+<footer>
+  <p>Demo from Red Hat</p>
+</footer>
+
+<!--CSSファイルの読み込み-->
+<link href="/static/css/main.css" rel="stylesheet">
+
+<!--jQueryファイルの読み込み-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</body>
+</html>

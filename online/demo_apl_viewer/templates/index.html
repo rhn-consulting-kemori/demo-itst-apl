@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<base target="_top">
+<title>Demo APL Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Demo APL Viewer">
+</head>
+
+<body>
+
+<div id="container">
+<div id="contents">
+<section id="category">
+
+<h2>顧客</h2>
+<div class="list">
+  <h3>顧客一覧</h3>
+  <table class="ta1">
+    <tr><th>顧客番号</th><th>カード番号</th><th>氏名</th><th>詳細</th></tr>
+    {% for customer in customers %}
+      <tr>
+        <td>{{ customer.customer_number }}</td>
+        <td>{{ customer.card_number }}</td>
+        <td>{{ customer.customer_name }}</td>
+        <td><input type="button" value="参照" onclick="location.href = '/show?customer_number={{ customer.customer_number }}';"></td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>
+
+</section>
+<!--/#category-->
+
+</div>
+<!--/#contents-->
+
+</div>
+<!--/#container-->
+
+<footer>
+  <p>Demo from Red Hat</p>
+</footer>
+
+<!--CSSファイルの読み込み-->
+<link href="/static/css/main.css" rel="stylesheet">
+
+<!--jQueryファイルの読み込み-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+</body>
+</html>
