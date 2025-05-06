@@ -136,9 +136,9 @@
                           "${exchangeProperty.yakujo_henko_history.pay_change_seikyu_shimebi}",
                           "pay_type": "SPリボ"}'
                   - to:
-                      id: to-http
+                      id: to-https
                       description: 請求反映
-                      uri: http
+                      uri: https
                       parameters:
                         bridgeEndpoint: true
                         httpMethod: POST

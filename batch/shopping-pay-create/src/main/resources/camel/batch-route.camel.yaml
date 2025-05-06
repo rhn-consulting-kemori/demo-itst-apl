@@ -45,7 +45,7 @@
                       - to:
                           id: to-api-sp1
                           description: Call pay_record sp1
-                          uri: http
+                          uri: https
                           parameters:
                             httpMethod: POST
                             httpUri: "{{camel-app.url_pay_create_sp1}}"
@@ -56,7 +56,7 @@
                         - to:
                             id: to-api-sprv
                             description: Call pay_record sprv
-                            uri: http
+                            uri: https
                             parameters:
                               httpMethod: POST
                               httpUri: "{{camel-app.url_pay_create_sprv}}"
