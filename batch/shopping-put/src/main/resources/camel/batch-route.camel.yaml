@@ -71,7 +71,7 @@
                   uri: file
                   parameters:
                     appendChars: \n
-                    directoryName: data/
+                    directoryName: /mnt/data/shopping/
                     fileExist: Append
                     fileName: "{{camel-app.outputfilename}}"
               - log:
