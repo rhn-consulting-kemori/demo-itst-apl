@@ -3,5 +3,6 @@ server:
 
 camel-app:
   simulationdate: ${SIMURATION_DATE:}
+  inputfilename: ${INPUT_FILENAME:shopping_put_data.txt}
   url_pay_create_sprv: ${URL_PAY_CREATE_SPRV:localhost:8282/camel/demo/pay_create/sprv}
   url_pay_create_sp1: ${URL_PAY_CREATE_SP1:localhost:8282/camel/demo/pay_create/sp1}

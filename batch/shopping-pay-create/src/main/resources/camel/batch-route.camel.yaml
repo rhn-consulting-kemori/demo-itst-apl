@@ -7,8 +7,8 @@
       uri: file
       parameters:
         delete: true
-        directoryName: data/
-        fileName: shopping_put_data.txt
+        directoryName: /mnt/data/shopping/
+        fileName: "{{camel-app.inputfilename}}"
       steps:
         - split:
             id: split-uriage-record
