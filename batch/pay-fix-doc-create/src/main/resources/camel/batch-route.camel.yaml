@@ -34,7 +34,7 @@
             description: ヘッダー出力
             uri: file
             parameters:
-              directoryName: data/
+              directoryName: /mnt/data/pay/
               fileName: "{{camel-app.payfixdocfilename}}"
         - to:
             id: to-sql-pay-fix-inf
@@ -73,7 +73,7 @@
                   uri: file
                   parameters:
                     appendChars: \n
-                    directoryName: data/
+                    directoryName: /mnt/data/pay/
                     fileExist: Append
                     fileName: "{{camel-app.payfixdocfilename}}"
               - to:
@@ -114,7 +114,7 @@
                         uri: file
                         parameters:
                           appendChars: \n
-                          directoryName: data/
+                          directoryName: /mnt/data/pay/
                           fileExist: Append
                           fileName: "{{camel-app.payfixdocfilename}}"
                   simple:
@@ -132,7 +132,7 @@
             uri: file
             parameters:
               appendChars: \n
-              directoryName: data/
+              directoryName: /mnt/data/pay/
               fileExist: Append
               fileName: "{{camel-app.payfixdocfilename}}"
         - log:
